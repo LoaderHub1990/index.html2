@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Running Heart</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  canvas {
+    display: block;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  const size = Math.min(window.innerWidth, window.innerHeight) * 0.95;
+  canvas.width = size;
+  canvas.height = size;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// วาดหัวใจ 1 ดวง ด้วยสมการพาราเมตริก รอบจุด (0,0) แล้วหมุนตาม angle
+function heartPoint(t, size) {
+  const x = 16 * Math.pow(Math.sin(t), 3);
+  const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+  return { x: x * size, y: -y * size };
+}
+
+function drawHeart(cx, cy, size, angle, hue) {
+  ctx.beginPath();
+  const steps = 120;
+  for (let i = 0; i <= steps; i++) {
+    const t = (i / steps) * Math.PI * 2;
+    const p = heartPoint(t, size);
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    const rx = p.x * cos - p.y * sin;
+    const ry = p.x * sin + p.y * cos;
+    const x = cx + rx;
+    const y = cy + ry;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = `hsl(${hue}, 100%, 60%)`;
+  ctx.lineWidth = 1.4;
+  ctx.stroke();
+}
+
+const TOTAL = 220;      // จำนวนหัวใจทั้งหมดต่อรอบ
+const STEP_ANGLE = (Math.PI * 2) / 90; // หมุนกี่เรเดียนต่อดวง
+const HUE_STEP = 2.2;
+
+let count = 0;
+let hue = 0;
+let cx, cy, size;
+
+function setup() {
+  resize();
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  cx = canvas.width / 2;
+  cy = canvas.height / 2 + canvas.height * 0.04;
+  size = canvas.width / 34;
+  count = 0;
+  hue = 0;
+}
+setup();
+
+function animate() {
+  if (count < TOTAL) {
+    // วาดหัวใจใหม่เพิ่มเข้าไปเรื่อยๆ แบบเรียงเร็วๆ
+    const angle = count * STEP_ANGLE;
+    drawHeart(cx, cy, size, angle, hue % 360);
+    hue += HUE_STEP;
+    count++;
+  } else {
+    // วาดครบรอบแล้ว หยุดพักแล้วเริ่มใหม่ (เอฟเฟกต์ "หัวใจวิ่ง" วนซ้ำ)
+    setTimeout(setup, 900);
+  }
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
