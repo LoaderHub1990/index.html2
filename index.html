@@ -2,13 +2,19 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>Running Heart</title>
+<title>รักหม่อนน่ะ</title>
 <style>
   html, body {
     margin: 0;
     height: 100%;
-    background: #000;
+    background: #050006;
     overflow: hidden;
+    font-family: "Segoe UI", "Sarabun", sans-serif;
+  }
+  #wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -16,82 +22,209 @@
   canvas {
     display: block;
   }
+  #startScreen {
+    position: absolute;
+    inset: 0;
+    background: #050006;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: opacity 0.6s ease;
+  }
+  #startBtn {
+    padding: 18px 48px;
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: #fff;
+    background: linear-gradient(135deg, #ff4d6d, #ff8fab);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(255, 77, 109, 0.6);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  #startBtn:hover {
+    transform: scale(1.06);
+    box-shadow: 0 0 45px rgba(255, 77, 109, 0.9);
+  }
+  #hint {
+    margin-top: 18px;
+    color: #ffb3c1;
+    font-size: 13px;
+    letter-spacing: 1px;
+    opacity: 0.8;
+  }
+  #message {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    top: 62%;
+    color: #fff;
+    font-size: clamp(22px, 5vw, 42px);
+    letter-spacing: 3px;
+    opacity: 0;
+    text-shadow: 0 0 18px rgba(255, 90, 130, 0.9);
+    transition: opacity 1.2s ease, transform 1.2s ease;
+    transform: translateY(10px);
+    pointer-events: none;
+  }
+  #muteBtn {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    z-index: 20;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    display: none;
+  }
 </style>
 </head>
 <body>
-<canvas id="c"></canvas>
+<div id="wrap">
+  <canvas id="c"></canvas>
+  <div id="message">รักหม่อนน่ะ</div>
+
+  <div id="startScreen">
+    <button id="startBtn">เริ่ม</button>
+    <div id="hint">กดเพื่อเริ่มและเปิดเสียงเพลง</div>
+  </div>
+
+  <button id="muteBtn">🔊 เสียง</button>
+</div>
+
+<audio id="bgm" src="https://far-amber-wls0t5sy.edgeone.dev/%E0%B8%94%E0%B8%B2%E0%B8%A7%E0%B8%99%E0%B9%8C%E0%B9%82%E0%B8%AB%E0%B8%A5%E0%B8%94%20(4).mp3" loop preload="auto"></audio>
+
 <script>
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
+const startScreen = document.getElementById('startScreen');
+const startBtn = document.getElementById('startBtn');
+const messageEl = document.getElementById('message');
+const bgm = document.getElementById('bgm');
+const muteBtn = document.getElementById('muteBtn');
 
 function resize() {
-  const size = Math.min(window.innerWidth, window.innerHeight) * 0.95;
-  canvas.width = size;
-  canvas.height = size;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 }
 resize();
 window.addEventListener('resize', resize);
 
-// วาดหัวใจ 1 ดวง ด้วยสมการพาราเมตริก รอบจุด (0,0) แล้วหมุนตาม angle
 function heartPoint(t, size) {
   const x = 16 * Math.pow(Math.sin(t), 3);
   const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
   return { x: x * size, y: -y * size };
 }
 
-function drawHeart(cx, cy, size, angle, hue) {
-  ctx.beginPath();
-  const steps = 120;
-  for (let i = 0; i <= steps; i++) {
-    const t = (i / steps) * Math.PI * 2;
-    const p = heartPoint(t, size);
-    const cos = Math.cos(angle), sin = Math.sin(angle);
-    const rx = p.x * cos - p.y * sin;
-    const ry = p.x * sin + p.y * cos;
-    const x = cx + rx;
-    const y = cy + ry;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.strokeStyle = `hsl(${hue}, 100%, 60%)`;
-  ctx.lineWidth = 1.4;
-  ctx.stroke();
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-const TOTAL = 220;      // จำนวนหัวใจทั้งหมดต่อรอบ
-const STEP_ANGLE = (Math.PI * 2) / 90; // หมุนกี่เรเดียนต่อดวง
-const HUE_STEP = 2.2;
-
-let count = 0;
-let hue = 0;
+let particles = [];
 let cx, cy, size;
+const N = 900;
+const ANIM_DURATION = 2200; // ms จากจุดเล็กๆ ไปเป็นรูปหัวใจ
+let startTime = null;
+let settled = false;
+let messageShown = false;
 
-function setup() {
-  resize();
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+function buildParticles() {
   cx = canvas.width / 2;
-  cy = canvas.height / 2 + canvas.height * 0.04;
-  size = canvas.width / 34;
-  count = 0;
-  hue = 0;
-}
-setup();
-
-function animate() {
-  if (count < TOTAL) {
-    // วาดหัวใจใหม่เพิ่มเข้าไปเรื่อยๆ แบบเรียงเร็วๆ
-    const angle = count * STEP_ANGLE;
-    drawHeart(cx, cy, size, angle, hue % 360);
-    hue += HUE_STEP;
-    count++;
-  } else {
-    // วาดครบรอบแล้ว หยุดพักแล้วเริ่มใหม่ (เอฟเฟกต์ "หัวใจวิ่ง" วนซ้ำ)
-    setTimeout(setup, 900);
+  cy = canvas.height / 2;
+  size = Math.min(canvas.width, canvas.height) / 42;
+  particles = [];
+  for (let i = 0; i < N; i++) {
+    const t = (i / N) * Math.PI * 2;
+    const target = heartPoint(t, size);
+    const burstAngle = Math.random() * Math.PI * 2;
+    const burstRadius = size * (6 + Math.random() * 10);
+    const burst = {
+      x: Math.cos(burstAngle) * burstRadius,
+      y: Math.sin(burstAngle) * burstRadius
+    };
+    particles.push({
+      tx: target.x, ty: target.y,
+      bx: burst.x, by: burst.y,
+      hueBase: 335 + Math.random() * 25,
+      twinkle: Math.random() * Math.PI * 2,
+      r: 1.1 + Math.random() * 1.6
+    });
   }
-  requestAnimationFrame(animate);
 }
-requestAnimationFrame(animate);
+
+function drawFrame(now) {
+  if (startTime === null) startTime = now;
+  const elapsed = now - startTime;
+  ctx.fillStyle = 'rgba(5,0,6,0.35)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  let pulse = 1;
+  if (elapsed >= ANIM_DURATION) {
+    if (!settled) {
+      settled = true;
+      setTimeout(() => {
+        messageEl.style.opacity = 1;
+        messageEl.style.transform = 'translateY(0)';
+      }, 350);
+    }
+    pulse = 1 + 0.045 * Math.sin(now / 260);
+  }
+
+  const rawT = Math.min(elapsed / ANIM_DURATION, 1);
+  const e = easeInOutCubic(rawT);
+
+  for (const p of particles) {
+    // เส้นทาง bezier: จุดศูนย์กลาง -> ระเบิดออก -> รวมเป็นหัวใจ
+    const omt = 1 - e;
+    const x0 = omt * omt * 0 + 2 * omt * e * p.bx + e * e * p.tx;
+    const y0 = omt * omt * 0 + 2 * omt * e * p.by + e * e * p.ty;
+
+    const x = cx + x0 * pulse;
+    const y = cy + y0 * pulse;
+
+    const shimmer = 55 + 25 * Math.sin(now / 260 + p.twinkle);
+    ctx.beginPath();
+    ctx.arc(x, y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsl(${p.hueBase}, 100%, ${shimmer}%)`;
+    ctx.shadowColor = `hsl(${p.hueBase}, 100%, 70%)`;
+    ctx.shadowBlur = 6;
+    ctx.fill();
+  }
+  ctx.shadowBlur = 0;
+
+  requestAnimationFrame(drawFrame);
+}
+
+function startShow() {
+  ctx.fillStyle = '#050006';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  buildParticles();
+  startTime = null;
+  settled = false;
+  requestAnimationFrame(drawFrame);
+}
+
+startBtn.addEventListener('click', () => {
+  startScreen.style.opacity = 0;
+  setTimeout(() => (startScreen.style.display = 'none'), 600);
+  bgm.currentTime = 0;
+  bgm.play().catch(() => {});
+  muteBtn.style.display = 'block';
+  startShow();
+});
+
+muteBtn.addEventListener('click', () => {
+  bgm.muted = !bgm.muted;
+  muteBtn.textContent = bgm.muted ? '🔇 เงียบ' : '🔊 เสียง';
+});
 </script>
 </body>
 </html>
