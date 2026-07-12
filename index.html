@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>อ่านทำไม</title>
+<title>หัวใจ</title>
 <style>
   html, body {
     margin: 0;
@@ -136,57 +136,61 @@ function heartPoint(t, size) {
   return { x: x * size, y: -y * size };
 }
 
-function drawHeart(cx, cy, size, angle, hue) {
-  ctx.beginPath();
-  const steps = 120;
-  for (let i = 0; i <= steps; i++) {
-    const t = (i / steps) * Math.PI * 2;
-    const p = heartPoint(t, size);
-    const cos = Math.cos(angle), sin = Math.sin(angle);
-    const rx = p.x * cos - p.y * sin;
-    const ry = p.x * sin + p.y * cos;
-    const x = cx + rx;
-    const y = cy + ry;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.strokeStyle = `hsl(${hue}, 100%, 60%)`;
-  ctx.lineWidth = 1.3;
-  ctx.stroke();
-}
+// หลักการแบบเดียวกับโค้ดต้นฉบับ: วาดรูปเดิมซ้ำๆ ที่จุดศูนย์กลางเดียวกัน ไม่หมุน
+// แต่ "ต่อ" ขึ้นไปเรื่อยๆ โดยแต่ละรอบขนาดใหญ่กว่ารอบก่อนหน้านิดเดียว วาดเร็วๆ ต่อกันจนเต็มขนาด
+// เพราะซ้อนกันถี่ๆ จากเล็กไปใหญ่ จะเห็นเป็นเส้นเรียงตัวหนาแน่นเป็นรูปหัวใจ ไล่สีรุ้งอลังการ
+const TOTAL = 260;              // จำนวนชั้นหัวใจทั้งหมดที่จะต่อกัน
+const HUE_STEP = 2;              // ไล่สีทีละนิดในแต่ละชั้น
 
-const TOTAL = 240;                       // จำนวนหัวใจทั้งหมด
-const STEP_ANGLE = (Math.PI * 2) / 95;   // หมุนกี่เรเดียนต่อดวง
-const HUE_STEP = 2.4;
-
+let cx, cy, minSize, maxSize;
 let count = 0;
 let hue = 0;
-let cx, cy, maxSize;
 
 function setupCanvas() {
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   cx = canvas.width / 2;
-  cy = canvas.height / 2 + canvas.height * 0.04;
-  maxSize = canvas.width / 34;
+  cy = canvas.height / 2 + canvas.height * 0.05;
+  minSize = canvas.width / 400;
+  maxSize = canvas.width / 30;
   count = 0;
   hue = 0;
 }
 
 function animate() {
   if (count < TOTAL) {
-    // เริ่มจากขนาดเล็กๆ แล้วค่อยๆ ขยายไปเต็มขนาด พร้อมหมุนซ้อนชั้นรัวๆ
-    const growth = Math.min(count / (TOTAL * 0.35), 1);
-    const size = maxSize * growth;
-    const angle = count * STEP_ANGLE;
-    drawHeart(cx, cy, size, angle, hue % 360);
-    hue += HUE_STEP;
-    count++;
+    // วาดหลายชั้นต่อเฟรม ให้ต่อกันไวๆ แต่ยังเห็นเป็นแอนิเมชัน
+    const batch = 3;
+    for (let n = 0; n < batch && count < TOTAL; n++) {
+      const progress = count / (TOTAL - 1);
+      const size = minSize + (maxSize - minSize) * progress; // ค่อยๆใหญ่ขึ้นทุกชั้น ไม่หมุน
+      drawHeart(cx, cy, size, hue % 360);
+      hue += HUE_STEP;
+      count++;
+    }
     requestAnimationFrame(animate);
   } else {
-    // วาดครบแล้ว หยุดพักสักครู่ แล้วค่อยๆ ลบหัวใจออก
     setTimeout(fadeOutHeart, 700);
   }
+}
+
+function drawHeart(px, py, sz, h) {
+  ctx.beginPath();
+  const steps = 140;
+  for (let i = 0; i <= steps; i++) {
+    const t = (i / steps) * Math.PI * 2;
+    const p = heartPoint(t, sz);
+    const x = px + p.x;
+    const y = py + p.y;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = `hsl(${h}, 100%, 60%)`;
+  ctx.shadowColor = `hsl(${h}, 100%, 65%)`;
+  ctx.shadowBlur = 6;
+  ctx.lineWidth = 1.4;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
 }
 
 function fadeOutHeart() {
