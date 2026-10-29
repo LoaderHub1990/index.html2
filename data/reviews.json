@@ -1,0 +1,42 @@
+[
+  {
+    "id": "rev1",
+    "productId": "prod1",
+    "productName": "KEY BYPASS VC ROBLOX",
+    "author": "ArmZa99",
+    "rating": 5,
+    "comment": "ใช้งานได้จริง ส่งคีย์เร็วมาก แนะนำเลยครับ",
+    "visible": true,
+    "createdAt": "2026-10-28T15:00:00Z"
+  },
+  {
+    "id": "rev2",
+    "productId": "prod2",
+    "productName": "HUB SCRIPT PRO X",
+    "author": "TonN_TH",
+    "rating": 5,
+    "comment": "สคริปต์ดีมาก เมนูภาษาไทยใช้งานง่ายมากครับ ฟังก์ชันครบ",
+    "visible": true,
+    "createdAt": "2026-10-27T10:00:00Z"
+  },
+  {
+    "id": "rev3",
+    "productId": "prod4",
+    "productName": "AIMBOT SCRIPT LITE",
+    "author": "PatPat77",
+    "rating": 4,
+    "comment": "ใช้งานได้ดี แต่บาง map ยังมีปัญหานิดหน่อย รอ update ครับ",
+    "visible": true,
+    "createdAt": "2026-10-26T09:00:00Z"
+  },
+  {
+    "id": "rev4",
+    "productId": "prod1",
+    "productName": "KEY BYPASS VC ROBLOX",
+    "author": "WinWin_55",
+    "rating": 5,
+    "comment": "เร็วมากครับ สั่งปุ๊บได้ทันที 5 ดาวเลย",
+    "visible": true,
+    "createdAt": "2026-10-25T14:00:00Z"
+  }
+]

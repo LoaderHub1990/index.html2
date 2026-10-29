@@ -1,0 +1,67 @@
+[
+  {
+    "id": "prod1",
+    "name": "KEY BYPASS VC ROBLOX",
+    "description": "คีย์บายพาส VC Roblox ใช้งานได้ทันที ไม่ต้องรอ รองรับทุกเซิร์ฟเวอร์ อัปเดตอัตโนมัติ",
+    "price": 29,
+    "categoryId": "cat1",
+    "image": "",
+    "deliveryType": "auto",
+    "keys": [
+      "KEY-A1B2-C3D4-E5F6",
+      "KEY-G7H8-I9J0-K1L2",
+      "KEY-M3N4-O5P6-Q7R8"
+    ],
+    "stock": 3,
+    "totalSold": 127,
+    "createdAt": "2026-01-15T00:00:00Z",
+    "active": true
+  },
+  {
+    "id": "prod2",
+    "name": "HUB SCRIPT PRO X",
+    "description": "สคริปต์ Hub เมนูภาษาไทย 100% ฟังก์ชันครบครัน ใช้งานง่าย รองรับหลายแมพ อัปเดตทุกสัปดาห์",
+    "price": 49,
+    "categoryId": "cat2",
+    "image": "",
+    "deliveryType": "auto",
+    "keys": [
+      "SCR-X1Y2-Z3A4-B5C6",
+      "SCR-D7E8-F9G0-H1I2"
+    ],
+    "stock": 2,
+    "totalSold": 89,
+    "createdAt": "2026-02-01T00:00:00Z",
+    "active": true
+  },
+  {
+    "id": "prod3",
+    "name": "VIP ID CODE SEASON 4",
+    "description": "โค้ดไอดี VIP Season 4 ปลดล็อกสกินพิเศษและไอเทมลิมิเต็ด ใช้ได้ 1 ครั้งต่อบัญชี",
+    "price": 79,
+    "categoryId": "cat3",
+    "image": "",
+    "deliveryType": "manual",
+    "keys": [],
+    "stock": 5,
+    "totalSold": 34,
+    "createdAt": "2026-03-01T00:00:00Z",
+    "active": true
+  },
+  {
+    "id": "prod4",
+    "name": "AIMBOT SCRIPT LITE",
+    "description": "สคริปต์ Aimbot รุ่น Lite ใช้งานง่าย FOV ปรับได้ ดีเลย์ต่ำ ไม่ดีเทคง่าย",
+    "price": 39,
+    "categoryId": "cat2",
+    "image": "",
+    "deliveryType": "auto",
+    "keys": [
+      "AIM-P1Q2-R3S4-T5U6"
+    ],
+    "stock": 1,
+    "totalSold": 56,
+    "createdAt": "2026-03-15T00:00:00Z",
+    "active": true
+  }
+]
