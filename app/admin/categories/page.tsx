@@ -13,7 +13,9 @@ export default function AdminCategories() {
   const [toast, setToast] = useState<{msg:string;type:'ok'|'err'}|null>(null)
 
   const load = () => fetch('/api/categories').then(r=>r.json()).then(setCats)
-  useEffect(load, [])
+  useEffect(() => {
+    void load()
+  }, [])
   const showToast = (msg:string,type:'ok'|'err'='ok') => { setToast({msg,type}); setTimeout(()=>setToast(null),3000) }
 
   const openAdd = () => { setForm(emptyForm); setModal('add') }

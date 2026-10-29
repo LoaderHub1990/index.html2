@@ -18,7 +18,9 @@ export default function AdminOrders() {
   const [toast, setToast] = useState<{msg:string;type:'ok'|'err'}|null>(null)
 
   const load = () => fetch('/api/orders').then(r=>r.json()).then(setOrders)
-  useEffect(load, [])
+  useEffect(() => {
+    void load()
+  }, [])
   const showToast = (msg:string,type:'ok'|'err'='ok') => { setToast({msg,type}); setTimeout(()=>setToast(null),3000) }
 
   const openEdit = (o:Order) => { setModal(o); setEditStatus(o.status); setEditKey(o.deliveredKey||'') }

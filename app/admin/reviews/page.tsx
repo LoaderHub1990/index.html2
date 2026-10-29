@@ -9,7 +9,9 @@ export default function AdminReviews() {
   const [toast, setToast] = useState<{msg:string;type:'ok'|'err'}|null>(null)
 
   const load = () => fetch('/api/reviews').then(r=>r.json()).then(setReviews)
-  useEffect(load, [])
+  useEffect(() => {
+    void load()
+  }, [])
   const showToast = (msg:string,type:'ok'|'err'='ok') => { setToast({msg,type}); setTimeout(()=>setToast(null),3000) }
 
   async function toggle(r: Review) {

@@ -28,7 +28,9 @@ export default function AdminProducts() {
     fetch('/api/products').then(r=>r.json()).then(setProducts)
     fetch('/api/categories').then(r=>r.json()).then(setCategories)
   }
-  useEffect(load, [])
+  useEffect(() => {
+    void load()
+  }, [])
 
   const showToast = (msg: string, type: 'ok'|'err' = 'ok') => {
     setToast({msg,type})
